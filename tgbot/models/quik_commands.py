@@ -36,8 +36,8 @@ async def add_birthday(telegram_id: int, name: str, birthday: datetime.date, pho
 
 
 async def select_all_birthdays(telegram_id: int):
-    users = await Birthday.query.where(Birthday.telegram_id == telegram_id).gino.all()
-    return users
+    birthdays = await Birthday.query.where(Birthday.telegram_id == telegram_id).gino.all()
+    return birthdays
 
 
 async def delete_all_birthdays(telegram_id: int):

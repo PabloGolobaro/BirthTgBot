@@ -1,22 +1,38 @@
 from aiogram import Dispatcher
-from aiogram.types import Message
-import asyncio
-
 import asyncpg
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message, CallbackQuery
 from aiogram.utils.markdown import hbold
 from aiogram.types.message import ContentType
-from aiogram.dispatcher.filters import CommandStart
 from aiogram import types
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from tgbot.keyboards.inline_main_menu import Base_file, main_menu
-# from loader import dp, db, bot, scheduler
 from tgbot.misc.states import Base_load
 from pathlib import Path
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 from tgbot.models import quik_commands as command
-from tgbot.models.schemas.user import User
+from tgbot.models.schemas.user import User, Birthday
+from tgbot.handlers.Notificatio_func import notification_scheduler
+
+
+async def update_db(path, id):
+    try:
+        await command.delete_all_birthdays(id)
+        birthdays = pd.read_excel(path)
+        for row in birthdays.itertuples(index=False):
+            name = row[0]
+            Date = row[1]
+            phone = row[2]
+            if isinstance(phone, float):
+                phone = None
+            date_year = Date.date()
+            await command.add_birthday(id, name, date_year, phone)
+        print(birthdays.head())
+        users = await command.select_all_birthdays(id)
+        print(f"После добавления: {users=}")
+    except Exception as err:
+        print(err)
 
 
 async def show_menu(message: Message):
@@ -24,8 +40,8 @@ async def show_menu(message: Message):
     await message.answer(text, reply_markup=main_menu)
     try:
         user: User = await command.add_user(
-            name=message.from_user.full_name,
-            id=message.from_user.id
+            full_name=message.from_user.full_name,
+            telegram_id=message.from_user.id
         )
         print(f"User added {user}")
     except asyncpg.exceptions.UniqueViolationError:
@@ -33,5 +49,66 @@ async def show_menu(message: Message):
         print(f"User is already exusts {user}")
 
 
+async def full_base(call: CallbackQuery):
+    full_base = await command.select_all_birthdays(call.from_user.id)
+    string = "№ | Имя | Дата Рождения | Телефон|\n"
+    for birthday in full_base:
+        string += "№"
+        birthday: Birthday
+        string += str(birthday.name) + " |"
+        string += str(birthday.birthday) + " |"
+        string += str(birthday.phone_number) + " |"
+        string += "\n"
+    await call.message.edit_reply_markup(reply_markup=None)
+    await call.message.answer(string, reply_markup=main_menu)
+
+
+async def send_base(call: CallbackQuery):
+    await call.message.edit_reply_markup(Base_file)
+
+
+async def menu(call: CallbackQuery):
+    await call.message.edit_reply_markup(main_menu)
+
+
+async def send_base_file(call: CallbackQuery):
+    await Base_load.Load_state.set()
+    await call.message.edit_reply_markup(reply_markup=None)
+    await call.message.answer("Отправьте файл БД в формате Excel.")
+
+
+async def download_document(message: types.Message, state: FSMContext, scheduler: AsyncIOScheduler):
+    path_to_download = Path().joinpath("Users", f"{message.from_user.id}")
+    path_to_download.mkdir(parents=True, exist_ok=True)
+    path_to_download = path_to_download.joinpath("Base.xlsx")
+    await message.document.download(destination=path_to_download)
+    await update_db(path_to_download, message.from_user.id)
+    await state.finish()
+    await message.answer("Файл базы данных обновлен.\n Включен режи оповещения", reply_markup=main_menu)
+    # scheduler.ctx.add_instance(message.from_user.id, declared_class=str)
+    user_id = str(message.from_user.id)
+    if scheduler.get_job(job_id=user_id):
+        scheduler.remove_job(job_id=user_id)
+        scheduler.add_job(notification_scheduler, "interval", seconds=180, args=(message.from_user.id, message.bot,),
+                          start_date=datetime.now(), id=user_id)
+    else:
+        # scheduler.add_job(notification_scheduler, "cron", hour="8,20", minute=5, args=(message.from_user.id,),
+        #                   start_date=datetime.now(), id=user_id)
+        scheduler.add_job(notification_scheduler, "interval", seconds=180, args=(message.from_user.id, message.bot,),
+                          start_date=datetime.now(), id=user_id)
+
+
+async def download_error(message: types.Message):
+    await message.answer("Ошибка получения файла БД.", reply_markup=Base_file)
+
+
 def register_user(dp: Dispatcher):
-    dp.register_message_handler(show_menu, commands=["start"], state="*")
+    dp.register_message_handler(show_menu, commands=["start"], state="*", is_admin=True)
+    dp.register_callback_query_handler(full_base, text="full_base", state="*", is_admin=True)
+    dp.register_callback_query_handler(send_base, text="users_base", state="*", is_admin=True)
+    dp.register_callback_query_handler(menu, text="menu", state="*", is_admin=True)
+    dp.register_callback_query_handler(send_base_file, text="send_base_file", state="*", is_admin=True)
+    dp.register_message_handler(download_document, content_types=ContentType.DOCUMENT, state=Base_load.Load_state,
+                                is_admin=True)
+    dp.register_message_handler(download_error, content_types=ContentType.ANY, state=Base_load.Load_state,
+                                is_admin=True)

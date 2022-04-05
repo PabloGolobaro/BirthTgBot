@@ -9,10 +9,10 @@ from tgbot.config import load_config, load_postgres_URI
 from tgbot.filters.admin import AdminFilter
 from tgbot.handlers.admin import register_admin
 from tgbot.handlers.echo import register_echo
-from tgbot.handlers.user import register_user
+from tgbot.handlers.user_menu import register_user
 from tgbot.middlewares.db import DbMiddleware
 from tgbot.models.gino_PostgreSQL import db, on_startup
-from tgbot.models.quik_commands import add_user, select_all_users
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 logger = logging.getLogger(__name__)
 
@@ -26,7 +26,7 @@ def register_all_filters(dp):
 
 
 def register_all_handlers(dp):
-    register_admin(dp)
+    # register_admin(dp)
     register_user(dp)
 
     register_echo(dp)
@@ -39,22 +39,24 @@ async def main():
     )
     logger.info("Starting bot")
     config = load_config(".env")
-    postgres_uri = load_postgres_URI()
+    postgres_uri = load_postgres_URI(".env")
+    scheduler = AsyncIOScheduler()
     storage = RedisStorage2() if config.tg_bot.use_redis else MemoryStorage()
     bot = Bot(token=config.tg_bot.token, parse_mode='HTML')
     dp = Dispatcher(bot, storage=storage)
 
     await on_startup(db, postgres_uri.postgres_uri)
     bot['config'] = config
-    await db.gino.drop_all()
-    await db.gino.create_all()
-    print(users)
+    bot['scheduler'] = scheduler
     register_all_middlewares(dp)
     register_all_filters(dp)
     register_all_handlers(dp)
 
     # start
     try:
+        # await db.gino.drop_all()
+        await db.gino.create_all()
+        scheduler.start()
         await dp.start_polling()
     finally:
         await dp.storage.close()
