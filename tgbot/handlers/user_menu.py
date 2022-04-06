@@ -13,7 +13,8 @@ import pandas as pd
 from datetime import datetime
 from tgbot.models import quik_commands as command
 from tgbot.models.schemas.user import User, Birthday
-from tgbot.handlers.Notificatio_func import notification_scheduler
+from tgbot.handlers.Notificatio_func import notification_scheduler, info_week, info_month
+
 
 
 async def update_db(path, id):
@@ -51,6 +52,7 @@ async def show_menu(message: Message):
 
 async def full_base(call: CallbackQuery):
     full_base = await command.select_all_birthdays(call.from_user.id)
+
     string = "№ | Имя | Дата Рождения | Телефон|\n"
     for birthday in full_base:
         string += "№"
@@ -102,12 +104,24 @@ async def download_error(message: types.Message):
     await message.answer("Ошибка получения файла БД.", reply_markup=Base_file)
 
 
+async def send_month(call: CallbackQuery):
+    await info_month(call.from_user.id, call.message.bot)
+    await call.message.edit_reply_markup(reply_markup=None)
+
+
+async def send_week(call: CallbackQuery):
+    await info_week(call.from_user.id, call.message.bot)
+    await call.message.edit_reply_markup(reply_markup=None)
+
+
 def register_user(dp: Dispatcher):
     dp.register_message_handler(show_menu, commands=["start"], state="*", is_admin=True)
     dp.register_callback_query_handler(full_base, text="full_base", state="*", is_admin=True)
     dp.register_callback_query_handler(send_base, text="users_base", state="*", is_admin=True)
     dp.register_callback_query_handler(menu, text="menu", state="*", is_admin=True)
     dp.register_callback_query_handler(send_base_file, text="send_base_file", state="*", is_admin=True)
+    dp.register_callback_query_handler(send_month, text="month", state="*", is_admin=True)
+    dp.register_callback_query_handler(send_week, text="week", state="*", is_admin=True)
     dp.register_message_handler(download_document, content_types=ContentType.DOCUMENT, state=Base_load.Load_state,
                                 is_admin=True)
     dp.register_message_handler(download_error, content_types=ContentType.ANY, state=Base_load.Load_state,

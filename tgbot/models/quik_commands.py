@@ -3,6 +3,7 @@ import datetime
 from asyncpg import UniqueViolationError
 
 from tgbot.models.schemas.user import Birthday, User
+from sqlalchemy import asc, extract
 
 
 async def add_user(telegram_id: int, full_name: str, username: str = None):
@@ -36,7 +37,8 @@ async def add_birthday(telegram_id: int, name: str, birthday: datetime.date, pho
 
 
 async def select_all_birthdays(telegram_id: int):
-    birthdays = await Birthday.query.where(Birthday.telegram_id == telegram_id).gino.all()
+    birthdays = await Birthday.query.where(Birthday.telegram_id == telegram_id).order_by(
+         extract("MONTH", Birthday.birthday),extract("DAY", Birthday.birthday)).gino.all()
     return birthdays
 
 
