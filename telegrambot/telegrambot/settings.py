@@ -14,6 +14,7 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 import sys
+
 sys.path.append("C:/Users/Professional/PycharmProjects/RealProjects/BirthdayBot3.0")
 
 from tgbot.config import load_postgres_URI
@@ -35,6 +36,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'birthdays',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -79,11 +81,11 @@ WSGI_APPLICATION = 'telegrambot.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config_PG.database ,
+        'NAME': config_PG.database,
         'USER': config_PG.user,
-        'PASSWORD':config_PG.password,
+        'PASSWORD': config_PG.password,
         'HOST': config_PG.host,
-        'PORT': '5432'
+        'PORT': '5432',
     }
 }
 
@@ -108,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-ru'
 
 TIME_ZONE = 'UTC'
 
