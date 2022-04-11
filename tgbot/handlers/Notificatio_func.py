@@ -4,8 +4,11 @@ from aiogram import Bot
 from aiogram.utils.markdown import hbold
 
 from tgbot.keyboards.inline_main_menu import main_menu
-from tgbot.models import quik_commands as command
-from tgbot.models.schemas.user import Birthday
+# from tgbot.models import quik_commands as command
+# from tgbot.models.schemas.user import Birthday
+from tgbot.models import django_commands as command
+from birthdays.models import User, Birthday
+
 
 
 async def notification_scheduler(user_id, bot: Bot):

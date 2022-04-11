@@ -11,8 +11,9 @@ from tgbot.misc.states import Base_load
 from pathlib import Path
 import pandas as pd
 from datetime import datetime
-from tgbot.models import quik_commands as command
-from tgbot.models.schemas.user import User, Birthday
+from tgbot.models import django_commands as command
+# from tgbot.models.schemas.user import User, Birthday
+from birthdays.models import User, Birthday
 from tgbot.handlers.Notificatio_func import notification_scheduler, info_week, info_month
 
 
@@ -39,10 +40,12 @@ async def update_db(path, id):
 async def show_menu(message: Message):
     text = f"Здравствуй {hbold(message.from_user.full_name)}\nВыберите необходимый пункт меню"
     await message.answer(text, reply_markup=main_menu)
+    # await command.add_birthday(message.from_user.id, "Golo", datetime.today(), "89102661082")
     try:
         user: User = await command.add_user(
             full_name=message.from_user.full_name,
-            telegram_id=message.from_user.id
+            telegram_id=message.from_user.id,
+            username= message.from_user.username
         )
         print(f"User added {user}")
     except asyncpg.exceptions.UniqueViolationError:

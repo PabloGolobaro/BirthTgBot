@@ -1,20 +1,24 @@
 import asyncio
 import logging
+import os
 
+import django
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from aiogram.contrib.fsm_storage.redis import RedisStorage2
-
 from tgbot.config import load_config, load_postgres_URI
 from tgbot.filters.admin import AdminFilter
-from tgbot.handlers.admin import register_admin
-from tgbot.handlers.echo import register_echo
-from tgbot.handlers.user_menu import register_user
 from tgbot.middlewares.db import DbMiddleware
 from tgbot.models.gino_PostgreSQL import db, on_startup
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 logger = logging.getLogger(__name__)
+
+
+def setup_django():
+    os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'telegrambot.settings')
+    os.environ.update({"DJANGO_ALLOW_ASYNC_UNSAFE": "true"})
+    django.setup()
 
 
 def register_all_middlewares(dp):
@@ -26,13 +30,15 @@ def register_all_filters(dp):
 
 
 def register_all_handlers(dp):
-    # register_admin(dp)
+    from tgbot.handlers.echo import register_echo
+    from tgbot.handlers.user_menu import register_user
     register_user(dp)
-
+    # register_admin(dp)
     register_echo(dp)
 
 
 async def main():
+    setup_django()
     logging.basicConfig(
         level=logging.INFO,
         format=u'%(filename)s:%(lineno)d #%(levelname)-8s [%(asctime)s] - %(name)s - %(message)s',

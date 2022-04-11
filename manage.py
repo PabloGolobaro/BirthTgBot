@@ -3,9 +3,14 @@
 import os
 import sys
 
+sys.path.append("C:/Users/Professional/PycharmProjects/RealProjects/BirthdayBot3.0/telegrambot/settings.py")
+from pathlib import Path
+
 
 def main():
     """Run administrative tasks."""
+    sys.path.append("C:/Users/Professional/PycharmProjects/RealProjects/BirthdayBot3.0")
+
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'telegrambot.settings')
     try:
         from django.core.management import execute_from_command_line

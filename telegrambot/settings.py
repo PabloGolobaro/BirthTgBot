@@ -11,17 +11,15 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 
 from pathlib import Path
-
+BASE_DIR = Path(__file__).resolve().parent.parent
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 import sys
 
-sys.path.append("C:/Users/Professional/PycharmProjects/RealProjects/BirthdayBot3.0")
+# sys.path.append("/")
 
 from tgbot.config import load_postgres_URI
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-
 config_PG = load_postgres_URI(".env")
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
