@@ -6,16 +6,12 @@
 {% endblock %}
 
 {% block title %}
-{{ birthday.name }}
+Добавить день рождения
 {% endblock %}
 
 {% block content %}
 <!--{% include 'includes/navbar.html'%}-->
-{%if result%}
-<p>{{result}}</p>
-<hr>
-{%endif%}
-<form action="/{{birthday.id}}" , method="post">
+<form action="/add" , method="post">
     {% csrf_token %}
     {%for field in form%}
     <div>
@@ -25,7 +21,6 @@
     </div>
     {%endfor%}
 
-    <button type="submit">Изменить</button>
+    <button type="submit">Отправить</button>
 </form>
 {% endblock %}
-

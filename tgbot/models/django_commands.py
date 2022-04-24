@@ -1,24 +1,28 @@
 import datetime
 
-from birthdays.models import User, Birthday
+from birthdays.models import Birthday
 from asgiref.sync import sync_to_async
+from django.contrib.auth.models import User
 
 
 @sync_to_async
-def select_user(telegram_id: int):
-    user = User.objects.filter(telegram_id=telegram_id).first()
+def select_user(telegram_id):
+    user = User.objects.get(telegram_id=telegram_id)
     print(user.__str__())
     return user
 
 
 @sync_to_async
-def add_user(telegram_id, full_name, username):
+def add_user(password, telegram_id, full_name, username):
     try:
-        user = User(telegram_id=int(telegram_id), full_name=full_name, username=username).save()
+        user = User(telegram_id=int(telegram_id), full_name=full_name, username=username)
+        user.set_password(password)
+        user.save()
+        print(f"User added {user}")
         return user
-    except Exception:
-        user = User.objects.filter(telegram_id=telegram_id).first()
-        print(user.__str__())
+    except:
+        user = User.objects.get(telegram_id=telegram_id)
+        print(f"User is already exists {user}")
         return user
 
 
@@ -30,15 +34,17 @@ def count_user():
 @sync_to_async
 def add_birthday(telegram_id: int, name: str, birthday: datetime.date, phone_number: str = None):
     try:
-        return Birthday(telegram_id=int(telegram_id), name=name, phone_number=phone_number, birthday=birthday).save()
+        user = User.objects.get(telegram_id=telegram_id)
+        return Birthday(user=user, name=name, phone_number=phone_number, birthday=birthday).save()
     except Exception as e:
         print(e)
 
+
 @sync_to_async
 def select_all_birthdays(telegram_id: int):
-    return Birthday.objects.filter(telegram_id=telegram_id).all()
+    return Birthday.objects.filter(user__telegram_id=telegram_id).all()
 
 
 @sync_to_async
 def delete_all_birthdays(telegram_id: int):
-    return Birthday.objects.filter(telegram_id=telegram_id).all().delete()
+    return Birthday.objects.filter(user__telegram_id=telegram_id).all().delete()

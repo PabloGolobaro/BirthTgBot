@@ -1,0 +1,16 @@
+<div>
+    {% if user.is_authenticated %}
+    Пользователь: {{ user.get_username }}
+    <a href="{% url 'logout'%}?next={{request.path}}">Выйти из аккаунта</a>
+    <ul>
+
+        <li><a href="{%url 'birthdays:index' %}">Главная</a></li>
+        <li><a href="{%url 'birthdays:add' %}">Добавить запись</a></li>
+
+    </ul>
+    {% else %}
+    <a href="{% url 'login'%}?next={{request.path}}">Войти в аккаунт</a>
+    {% endif %}
+
+</div>
+

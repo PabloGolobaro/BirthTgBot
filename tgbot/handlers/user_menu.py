@@ -13,9 +13,10 @@ import pandas as pd
 from datetime import datetime
 from tgbot.models import django_commands as command
 # from tgbot.models.schemas.user import User, Birthday
-from birthdays.models import User, Birthday
+from birthdays.models import Birthday
+from django.contrib.auth.models import User
 from tgbot.handlers.Notificatio_func import notification_scheduler, info_week, info_month
-
+import socket
 
 
 async def update_db(path, id):
@@ -38,19 +39,30 @@ async def update_db(path, id):
 
 
 async def show_menu(message: Message):
-    text = f"Здравствуй {hbold(message.from_user.full_name)}\nВыберите необходимый пункт меню"
-    await message.answer(text, reply_markup=main_menu)
-    # await command.add_birthday(message.from_user.id, "Golo", datetime.today(), "89102661082")
+    log_text = ""
+    host = socket.gethostbyname(socket.gethostname())
     try:
+        user = await command.select_user(telegram_id=message.from_user.id)
+    except:
+        password = User.objects.make_random_password(length=8)
         user: User = await command.add_user(
+            password=password,
             full_name=message.from_user.full_name,
             telegram_id=message.from_user.id,
-            username= message.from_user.username
+            username=message.from_user.username
         )
-        print(f"User added {user}")
-    except asyncpg.exceptions.UniqueViolationError:
-        user = await command.select_user(id=message.from_user.id)
-        print(f"User is already exusts {user}")
+        log_text = f"Похоже вы здесь впервые.\n{hbold('Ваши данные для входа на сайт:')}\nИмя пользователя: {user.username}\nПароль: {password}\nНе потеряйте их!\n"
+    text = f"Здравствуй {hbold(message.from_user.full_name)}\n{log_text}Переход на сайт по адресу: {host}:8000\nВыберите необходимый пункт меню"
+    await message.answer(text, reply_markup=main_menu)
+
+
+# async def show_log_data(call: CallbackQuery):
+#     try:
+#         user = await command.select_user(telegram_id=call.from_user.id)
+#         text = f"Ваши данные {hbold(call.from_user.full_name)} для входа на сайт\nИмя пользователя: {user.username}\nПароль: {user.password}"
+#         await call.message.answer(text, reply_markup=main_menu)
+#     except Exception as e:
+#         print(e)
 
 
 async def full_base(call: CallbackQuery):
@@ -120,6 +132,7 @@ async def send_week(call: CallbackQuery):
 def register_user(dp: Dispatcher):
     dp.register_message_handler(show_menu, commands=["start"], state="*", is_admin=True)
     dp.register_callback_query_handler(full_base, text="full_base", state="*", is_admin=True)
+    # dp.register_callback_query_handler(show_log_data, text="log_data", state="*", is_admin=True)
     dp.register_callback_query_handler(send_base, text="users_base", state="*", is_admin=True)
     dp.register_callback_query_handler(menu, text="menu", state="*", is_admin=True)
     dp.register_callback_query_handler(send_base_file, text="send_base_file", state="*", is_admin=True)

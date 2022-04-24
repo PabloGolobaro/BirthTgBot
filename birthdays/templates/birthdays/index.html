@@ -1,0 +1,29 @@
+{%extends 'base.html' %}
+
+{%load static %}
+{% block css_additional %}
+
+{% endblock %}
+
+{% block title %}
+Меню
+{% endblock %}
+
+{% block content %}
+
+{%if not user.is_authenticated%}
+<h2>Вы не зарегестрированны в системе. Войдите или зарегестрирйтесь чтобы пользоваться сервисом.</h2>
+{%else%}
+{% if page_obj %}
+{% for Birthday in page_obj %}
+<li><a href="{% url 'birthdays:detail' Birthday.id %}">{{ Birthday.name}}</a> День рождения: {{ Birthday.birthday }}
+    Номер телефона: {{ Birthday.phone_number|default:'Не указан' }}
+</li>
+<hr>
+{% endfor %}
+{% include 'includes/pagination.html'%}
+{% else %}
+<p>Дней рождений в базе нет.</p>
+{% endif %}
+{%endif%}
+{% endblock %}

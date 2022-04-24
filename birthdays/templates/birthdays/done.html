@@ -1,0 +1,16 @@
+{%extends 'base.html' %}
+
+{%load static %}
+{% block css_additional %}
+
+{% endblock %}
+
+{% block title %}
+Добавить день рождения
+{% endblock %}
+
+{% block content %}
+<!--{% include 'includes/navbar.html'%}-->
+<h2>Ваш пользователь успешно добавлен</h2>
+<a href="{%url 'birthdays:index' %}">Вернуться в главное меню</a>
+{% endblock %}

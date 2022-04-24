@@ -11,6 +11,9 @@ main_menu = InlineKeyboardMarkup(inline_keyboard=[
     [
         InlineKeyboardButton(text="Дни рождения на неделю вперед", callback_data="week")
     ]
+    # [
+    #     InlineKeyboardButton(text="Данные для входа на сайт", callback_data="log_data")
+    # ]
 ])
 
 Base_file = InlineKeyboardMarkup(inline_keyboard=[

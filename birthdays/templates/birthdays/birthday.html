@@ -1,9 +1,0 @@
-{% if user_birthdays_list %}
-    <ul>
-    {% for Birthday in user_birthdays_list %}
-        <li><a href="{% url 'birthdays:detail' Birthday.id %}">{{ Birthday.name }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
-    <p>No polls are available.</p>
-{% endif %}

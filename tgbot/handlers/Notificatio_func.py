@@ -7,8 +7,7 @@ from tgbot.keyboards.inline_main_menu import main_menu
 # from tgbot.models import quik_commands as command
 # from tgbot.models.schemas.user import Birthday
 from tgbot.models import django_commands as command
-from birthdays.models import User, Birthday
-
+from birthdays.models import Birthday
 
 
 async def notification_scheduler(user_id, bot: Bot):
@@ -55,7 +54,8 @@ async def notification_scheduler(user_id, bot: Bot):
         await bot.send_message(user_id, text)
         print(text)
 
-async def info_month(id,bot: Bot):
+
+async def info_month(id, bot: Bot):
     birthdays = await command.select_all_birthdays(id)
     text = "В этом месяце день рождения:\n---------------\n"
     for birthday in birthdays:
@@ -78,7 +78,7 @@ async def info_month(id,bot: Bot):
         print("Ничего!")
 
 
-async def info_week(id,bot: Bot):
+async def info_week(id, bot: Bot):
     birthdays = await command.select_all_birthdays(id)
     text = "На неделю вперед дни рождения:\n---------------\n"
     for i in range(1, 8):

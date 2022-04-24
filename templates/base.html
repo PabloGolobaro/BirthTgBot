@@ -1,0 +1,54 @@
+{%load static %}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/templatemo_style.css' %}">
+    {% block css_additional %}{% endblock %}
+</head>
+<body>
+<div id="templatemo_header">
+
+    <div id="site_title"><h1><a href="#">Дни рождения</a></h1></div>
+
+    <!--        <div id="search_box">-->
+    <!--            <form action="#" method="get">-->
+    <!--                <input type="text" value="Search" name="q" size="10" id="searchfield" title="searchfield" onfocus="clearText(this)" onblur="clearText(this)" />-->
+    <!--            </form>-->
+    <!--        </div>-->
+
+</div> <!-- end of templatemo header -->
+
+<div id="templatemo_menu">
+    {% include 'includes/navbar.html'%}
+</div> <!-- end of templatemo_menu -->
+
+<div class="col_w620 float_l">
+    <div class="cleaner"></div>
+
+    <h2>Ваши дни рождения</h2>
+
+    <img src="static/images/templamtemo_menu.png" class="image_wrapper image_fr" alt="banner"/>
+
+    <div class="cleaner h10"></div>
+
+    <ul class="tmo_list float_l">
+        {% block content %}{% endblock %}
+    </ul>
+
+    <div class="cleaner"></div>
+
+</div>
+
+<div id="templatemo_footer_wrapper">
+
+    <div id="templatemo_footer">
+        Copyright © 2022 <a href="#">GoloScullLimited</a>
+        <div class="cleaner"></div>
+    </div>
+
+</div>
+</body>
+</html>
