@@ -4,6 +4,9 @@ ENV BOT_NAME=$BOT_NAME
 
 WORKDIR /usr/src/app/"${BOT_NAME:-tg_bot}"
 
+
 COPY requirements.txt /usr/src/app/"${BOT_NAME:-tg_bot}"
 RUN pip install -r /usr/src/app/"${BOT_NAME:-tg_bot}"/requirements.txt
 COPY . /usr/src/app/"${BOT_NAME:-tg_bot}"
+
+COPY models.py /usr/local/lib/python3.9/site-packages/django/contrib/auth/models.py

@@ -13,13 +13,13 @@ services:
       networks:
         - tg_bot
       volumes:
-        - ./postgres:/var/lib/postgresql
+        - ./postgres_new:/var/lib/postgresql
 
     django:
       container_name: djangoproject
       build:
         context: .
-      command: bash -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000 --noreload"
+      command: bash -c "python manage.py makemigrations && python manage.py migrate && python manage.py runserver 0.0.0.0:8000 --noreload"
       ports:
         - 8000:8000
       networks:

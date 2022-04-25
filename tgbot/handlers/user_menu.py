@@ -6,6 +6,8 @@ from aiogram.utils.markdown import hbold
 from aiogram.types.message import ContentType
 from aiogram import types
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+
+from bot import host
 from tgbot.keyboards.inline_main_menu import Base_file, main_menu
 from tgbot.misc.states import Base_load
 from pathlib import Path
@@ -16,7 +18,6 @@ from tgbot.models import django_commands as command
 from birthdays.models import Birthday
 from django.contrib.auth.models import User
 from tgbot.handlers.Notificatio_func import notification_scheduler, info_week, info_month
-import socket
 
 
 async def update_db(path, id):
@@ -40,7 +41,7 @@ async def update_db(path, id):
 
 async def show_menu(message: Message):
     log_text = ""
-    host = socket.gethostbyname(socket.gethostname())
+    # host = socket.gethostbyname(socket.gethostname())
     try:
         user = await command.select_user(telegram_id=message.from_user.id)
     except:
@@ -54,15 +55,6 @@ async def show_menu(message: Message):
         log_text = f"Похоже вы здесь впервые.\n{hbold('Ваши данные для входа на сайт:')}\nИмя пользователя: {user.username}\nПароль: {password}\nНе потеряйте их!\n"
     text = f"Здравствуй {hbold(message.from_user.full_name)}\n{log_text}Переход на сайт по адресу: {host}:8000\nВыберите необходимый пункт меню"
     await message.answer(text, reply_markup=main_menu)
-
-
-# async def show_log_data(call: CallbackQuery):
-#     try:
-#         user = await command.select_user(telegram_id=call.from_user.id)
-#         text = f"Ваши данные {hbold(call.from_user.full_name)} для входа на сайт\nИмя пользователя: {user.username}\nПароль: {user.password}"
-#         await call.message.answer(text, reply_markup=main_menu)
-#     except Exception as e:
-#         print(e)
 
 
 async def full_base(call: CallbackQuery):
@@ -106,12 +98,12 @@ async def download_document(message: types.Message, state: FSMContext, scheduler
     user_id = str(message.from_user.id)
     if scheduler.get_job(job_id=user_id):
         scheduler.remove_job(job_id=user_id)
-        scheduler.add_job(notification_scheduler, "interval", seconds=180, args=(message.from_user.id, message.bot,),
+        scheduler.add_job(notification_scheduler, "cron", hour="8,20", args=(message.from_user.id, message.bot,),
                           start_date=datetime.now(), id=user_id)
     else:
         # scheduler.add_job(notification_scheduler, "cron", hour="8,20", minute=5, args=(message.from_user.id,),
         #                   start_date=datetime.now(), id=user_id)
-        scheduler.add_job(notification_scheduler, "interval", seconds=180, args=(message.from_user.id, message.bot,),
+        scheduler.add_job(notification_scheduler, "cron", hour="8,20", args=(message.from_user.id, message.bot,),
                           start_date=datetime.now(), id=user_id)
 
 
@@ -130,15 +122,13 @@ async def send_week(call: CallbackQuery):
 
 
 def register_user(dp: Dispatcher):
-    dp.register_message_handler(show_menu, commands=["start"], state="*", is_admin=True)
-    dp.register_callback_query_handler(full_base, text="full_base", state="*", is_admin=True)
-    # dp.register_callback_query_handler(show_log_data, text="log_data", state="*", is_admin=True)
-    dp.register_callback_query_handler(send_base, text="users_base", state="*", is_admin=True)
-    dp.register_callback_query_handler(menu, text="menu", state="*", is_admin=True)
-    dp.register_callback_query_handler(send_base_file, text="send_base_file", state="*", is_admin=True)
-    dp.register_callback_query_handler(send_month, text="month", state="*", is_admin=True)
-    dp.register_callback_query_handler(send_week, text="week", state="*", is_admin=True)
-    dp.register_message_handler(download_document, content_types=ContentType.DOCUMENT, state=Base_load.Load_state,
-                                is_admin=True)
-    dp.register_message_handler(download_error, content_types=ContentType.ANY, state=Base_load.Load_state,
-                                is_admin=True)
+    dp.register_message_handler(show_menu, commands=["start"], state="*")
+    dp.register_callback_query_handler(full_base, text="full_base", state="*")
+
+    dp.register_callback_query_handler(send_base, text="users_base", state="*")
+    dp.register_callback_query_handler(menu, text="menu", state="*")
+    dp.register_callback_query_handler(send_base_file, text="send_base_file", state="*")
+    dp.register_callback_query_handler(send_month, text="month", state="*")
+    dp.register_callback_query_handler(send_week, text="week", state="*")
+    dp.register_message_handler(download_document, content_types=ContentType.DOCUMENT, state=Base_load.Load_state)
+    dp.register_message_handler(download_error, content_types=ContentType.ANY, state=Base_load.Load_state)

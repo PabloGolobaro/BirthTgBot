@@ -1,7 +1,7 @@
 import asyncio
 import logging
 import os
-
+import stun
 import django
 from aiogram import Bot, Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
@@ -13,7 +13,7 @@ from tgbot.models.gino_PostgreSQL import db, on_startup
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 logger = logging.getLogger(__name__)
-
+host = stun.get_ip_info()[1]
 
 def setup_django():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'telegrambot.settings')
